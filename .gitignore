@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+.env
+.env.*
+*.log
+.local/
+PROGRESS.md
+!templates/project/PROGRESS.md
+수집/
+분석/
