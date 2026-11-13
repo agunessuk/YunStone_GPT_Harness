@@ -56,34 +56,34 @@ class Install(unittest.TestCase):
         self.put(".codex/hooks.json", json.dumps(original))
         self.run_install()
         self.run_install("--uninstall")
-        self.assertEqual(json.loads((self.home/".codex/hooks.json").read_text()), original)
-        self.assertIn("Keep this.", (self.home/".codex/AGENTS.md").read_text())
-        self.assertEqual((self.home/".codex/config.toml").read_text(), 'model = "user-choice"\n')
+        self.assertEqual(json.loads((self.home/".codex/hooks.json").read_text(encoding="utf-8")), original)
+        self.assertIn("Keep this.", (self.home/".codex/AGENTS.md").read_text(encoding="utf-8"))
+        self.assertEqual((self.home/".codex/config.toml").read_text(encoding="utf-8"), 'model = "user-choice"\n')
 
     def test_unmanaged_skill_skipped(self):
         path = self.put(".agents/skills/resume-work/SKILL.md", "user content")
         result = self.run_install()
         self.assertIn("건너뜀", result.stdout.decode("utf-8"))
-        self.assertEqual(path.read_text(), "user content")
+        self.assertEqual(path.read_text(encoding="utf-8"), "user content")
         self.run_install("--uninstall")
-        self.assertEqual(path.read_text(), "user content")
+        self.assertEqual(path.read_text(encoding="utf-8"), "user content")
 
     def test_modified_skill_preserved(self):
         self.run_install()
         path = self.put(".agents/skills/resume-work/SKILL.md", "user changed")
         self.run_install()
         self.run_install("--uninstall")
-        self.assertEqual(path.read_text(), "user changed")
+        self.assertEqual(path.read_text(encoding="utf-8"), "user changed")
 
     def test_adopt_legacy_restores_original(self):
         path = self.put(".agents/skills/resume-work/SKILL.md", "legacy original")
         self.put(".agents/skills/resume-work/.local-harness", "legacy")
         self.run_install()
-        self.assertEqual(path.read_text(), "legacy original")
+        self.assertEqual(path.read_text(encoding="utf-8"), "legacy original")
         self.run_install("--adopt-legacy")
-        self.assertNotEqual(path.read_text(), "legacy original")
+        self.assertNotEqual(path.read_text(encoding="utf-8"), "legacy original")
         self.run_install("--uninstall")
-        self.assertEqual(path.read_text(), "legacy original")
+        self.assertEqual(path.read_text(encoding="utf-8"), "legacy original")
 
     def test_invalid_config_no_partial_install(self):
         self.put(".codex/hooks.json", "{invalid")
@@ -108,7 +108,7 @@ class Install(unittest.TestCase):
         self.run_install()
         path = self.put(".codex/hooks/yunstone-gpt/user.py", "mine")
         self.run_install("--uninstall")
-        self.assertEqual(path.read_text(), "mine")
+        self.assertEqual(path.read_text(encoding="utf-8"), "mine")
         self.assertFalse((self.home/".codex/hooks/yunstone-gpt/guard.py").exists())
         self.assertFalse((self.home/".codex/hooks.json").exists())
 

@@ -126,6 +126,19 @@ class Hooks(unittest.TestCase):
             self.skipTest("symlinks unavailable")
         self.assertEqual(self.patch("*** Add File: input/a\n+x").get("permissionDecision"), "deny")
 
+    def test_cwd_alias_and_outward_symlink(self):
+        outside = Path(self.tmp.name)/"outside"
+        outside.mkdir()
+        alias = Path(self.tmp.name)/"project-alias"
+        try:
+            alias.symlink_to(self.project, target_is_directory=True)
+            (self.project/"input").symlink_to(outside, target_is_directory=True)
+        except OSError:
+            self.skipTest("symlinks unavailable")
+        for path in ("input/a", str(alias/"input/a")):
+            result = self.run_hook("Write", {"file_path": path}, cwd=alias)
+            self.assertEqual(result.get("permissionDecision"), "deny")
+
     def test_restore_bounded(self):
         self.write("PROGRESS.md", "x"*20000)
         self.assertLess(len(self.run_hook(script="session_restore.py")["additionalContext"]), 7000)

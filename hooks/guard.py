@@ -30,7 +30,12 @@ def check_path(raw, root, cwd):
     path = Path(raw)
     if not path.is_absolute():
         path = Path(cwd)/path
-    lexical = Path(os.path.abspath(path))
+    # Resolve the cwd alias (macOS /var, Windows junctions), but not the
+    # target's symlinks: both the named protected path and real target matter.
+    try:
+        lexical = Path(os.path.abspath(Path(cwd).resolve()/os.path.relpath(path, cwd)))
+    except ValueError:  # different Windows drive
+        lexical = Path(os.path.abspath(path))
     path = path.resolve()
     codex = Path(os.environ.get("CODEX_HOME", str(Path.home()/".codex"))).resolve()
     if path in (codex/"hooks.json", codex/"config.toml") or inside(path, codex/"hooks"/"yunstone-gpt") is not None:
